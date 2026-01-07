@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>NEXUS FORENSICS // MEMORY ANALYZER</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <nav class="sidebar">
+        <div class="logo-area">
+            <h2>NEXUS</h2>
+            <span>FORENSICS v3.5</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active" onclick="switchView('dashboard', this)">DASHBOARD</li>
+            <li class="nav-item" onclick="switchView('processes', this)">PROCESS LIST</li>
+            <li class="nav-item" onclick="switchView('connections', this)">NET CONNECTIONS</li>
+            <li class="nav-item" onclick="switchView('suspicious', this)">THREAT HUNT</li>
+            <li class="nav-item" onclick="switchView('timeline', this)">EVENT TIMELINE</li>
+            <li class="nav-item" onclick="switchView('memory', this)">MEMORY MAP</li>
+            <li class="nav-item" onclick="switchView('capture', this)">RAM CAPTURE</li>
+            <li class="nav-item" onclick="switchView('specs', this)">SYSTEM SPECS</li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <div class="scan-line"></div>
+
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboard" class="view-section active-view">
+            <div class="toolbar">
+                <h2 class="text-neon">SYSTEM STATUS // OVERVIEW</h2>
+                <button class="btn" onclick="updateDashboard()">REFRESH</button>
+            </div>
+
+            <div class="widget-grid">
+                <div class="widget">
+                    <h3>CPU USAGE</h3>
+                    <div class="value" id="dash-cpu">0%</div>
+                    <div class="chart-container">
+                        <canvas id="cpuChart"></canvas>
+                    </div>
+                </div>
+                <div class="widget">
+                    <h3>RAM USAGE</h3>
+                    <div class="value" id="dash-ram">0%</div>
+                    <div class="chart-container">
+                        <canvas id="ramChart"></canvas>
+                    </div>
+                </div>
+                <div class="widget">
+                    <h3>PROCESSES</h3>
+                    <div class="value" id="dash-procs">0</div>
+                    <div class="label">Running Tasks</div>
+                </div>
+                <div class="widget">
+                    <h3>CONNECTIONS</h3>
+                    <div class="value" id="dash-conns">0</div>
+                    <div class="label">Active Sockets</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">SYSTEM HEALTH</span>
+                    <span class="badge badge-warning" id="dash-threats">0 THREATS</span>
+                </div>
+                <div class="panel-body">
+                    <div class="spec-row">
+                        <span class="spec-key">SYSTEM UPTIME</span>
+                        <span class="spec-val" id="dash-uptime">0:00:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROCESSES VIEW -->
+        <div id="processes" class="view-section">
+            <div class="toolbar">
+                <h2 class="text-neon">PROCESS MANAGER</h2>
+                <div>
+                    <input type="text" id="proc-search" placeholder="Search PID or Name..." onkeyup="filterProcesses()">
+                    <button class="btn" onclick="refreshProcesses()">REFRESH</button>
+                    <button class="btn" onclick="exportProcesses()">EXPORT JSON</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>PID</th>
+                        <th>NAME</th>
+                        <th>STATUS</th>
+                        <th>MEM%</th>
+                        <th>CPU%</th>
+                        <th>THREADS</th>
+                        <th>CONNS</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="proc-body"></tbody>
+            </table>
+        </div>
+
+        <!-- CONNECTIONS VIEW -->
+        <div id="connections" class="view-section">
+            <div class="toolbar">
+                <h2 class="text-neon">NETWORK TRAFFIC</h2>
+
+                <div style="display:flex; gap:10px;">
+                    <select id="conn-filter" onchange="refreshConnections()">
+                        <option value="">ALL STATUS</option>
+                        <option value="ESTABLISHED">ESTABLISHED</option>
+                        <option value="LISTEN">LISTEN</option>
+                        <option value="TIME_WAIT">TIME_WAIT</option>
+                        <option value="CLOSE_WAIT">CLOSE_WAIT</option>
+                        <option value="SYN_SENT">SYN_SENT</option>
+                        <option value="NONE">UDP / OTHER</option>
+                    </select>
+                    <button class="btn" onclick="refreshConnections()">REFRESH</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>PID</th>
+                        <th>PROCESS</th>
+                        <th>LOCAL ADDRESS</th>
+                        <th>REMOTE ADDRESS</th>
+                        <th>STATUS</th>
+                        <th>TYPE</th>
+                    </tr>
+                </thead>
+                <tbody id="conn-body"></tbody>
+            </table>
+        </div>
+
+        <!-- SUSPICIOUS VIEW -->
+        <div id="suspicious" class="view-section">
+            <div class="toolbar">
+                <h2 class="text-neon">THREAT HUNTER</h2>
+                <button class="btn" onclick="analyzeSuspicious()">REFRESH SCANS</button>
+            </div>
+            <div id="threat-alerts"></div>
+        </div>
+
+        <!-- TIMELINE VIEW -->
+        <div id="timeline" class="view-section">
+            <div class="toolbar">
+                <h2 class="text-neon">PROCESS TIMELINE</h2>
+                <button class="btn" onclick="loadTimeline()">REFRESH TIMELINE</button>
+            </div>
+            <div id="timeline-content"></div>
+        </div>
+
+        <!-- MEMORY MAP VIEW -->
+        <div id="memory" class="view-section">
+            <h2 class="text-neon">MEMORY ANALYSIS</h2>
+
+            <div class="widget-grid">
+                <div class="widget">
+                    <h3>VIRTUAL MEMORY</h3>
+                    <div id="mem-overview"></div>
+                </div>
+                <div class="widget">
+                    <h3>TOP MEMORY USERS</h3>
+                    <div id="mem-top"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">MEMORY REGIONS</span>
+                </div>
+                <div class="panel-body" id="mem-regions"></div>
+            </div>
+
+            <h3 style="margin-top:40px; color: var(--neon);">PROCESS MEMORY INSPECTOR</h3>
+            <div class="toolbar">
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="dump-pid" placeholder="Enter PID to Analyze">
+                    <button class="btn" onclick="analyzeDump()">ANALYZE PROCESS MEMORY</button>
+                </div>
+            </div>
+            <div id="dump-results"></div>
+        </div>
+
+        <!-- CAPTURE VIEW -->
+        <div id="capture" class="view-section">
+            <h2 class="text-neon">RAM ACQUISITION AGENT</h2>
+
+            <div class="widget-grid">
+                <div class="widget">
+                    <h3>TARGET SYSTEM</h3>
+                    <div class="spec-row"><span class="spec-key">HOSTNAME</span><span class="spec-val"
+                            id="cap-hostname">-</span></div>
+                    <div class="spec-row"><span class="spec-key">OS</span><span class="spec-val" id="cap-os">-</span>
+                    </div>
+                    <div class="spec-row"><span class="spec-key">RAM</span><span class="spec-val" id="cap-ram">-</span>
+                    </div>
+                </div>
+                <div class="widget">
+                    <h3>STATUS</h3>
+                    <div class="spec-row"><span class="spec-key">UPTIME</span><span class="spec-val"
+                            id="cap-uptime">-</span></div>
+                    <div class="spec-row"><span class="spec-key">LOCAL TIME</span><span class="spec-val"
+                            id="cap-time">-</span></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">CAPTURE CONFIGURATION</span>
+                    <button class="btn" onclick="showCaptureInfo()">ℹ FORMAT INFO</button>
+                </div>
+                <div class="panel-body">
+                    <div style="display:flex; gap:20px; align-items:flex-end;">
+                        <div>
+                            <label style="display:block; color:#888; margin-bottom:5px;">CASE ID</label>
+                            <input type="text" id="case-id" value="CASE001">
+                        </div>
+                        <div>
+                            <label style="display:block; color:#888; margin-bottom:5px;">INVESTIGATOR</label>
+                            <input type="text" id="investigator" value="ADMIN">
+                        </div>
+                        <div>
+                            <label style="display:block; color:#888; margin-bottom:5px;">OUTPUT FORMAT</label>
+                            <select id="output-format">
+                                <option value="raw">.RAW (Volatility Compatible)</option>
+                                <option value="lime">.LIME (Linux Only)</option>
+                                <option value="mem">.MEM (Generic)</option>
+                                <option value="all">ALL FORMATS (Forensic)</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-danger blink" onclick="startCapture()">⚠ START ACQUISITION</button>
+                    </div>
+
+                    <div id="capture-progress" style="margin-top:30px; display:none;">
+                        <div class="bar-container">
+                            <div id="capture-bar" class="bar-fill"></div>
+                        </div>
+                        <p id="capture-status" style="margin-top:10px; color: var(--neon); text-align:center;">
+                            Initializing...</p>
+                    </div>
+
+                    <div id="capture-metadata" style="margin-top: 30px;">
+                        <!-- METADATA WILL APPEAR HERE -->
+                    </div>
+
+                    <div id="capture-artifacts" style="margin-top: 30px;">
+                        <!-- DOWNLOAD LINKS WILL APPEAR HERE -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SPECS VIEW -->
+        <div id="specs" class="view-section">
+            <h2 class="text-neon">SYSTEM SPECIFICATIONS</h2>
+
+            <div class="widget-grid">
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">OPERATING SYSTEM</span></div>
+                    <div class="panel-body" id="spec-os-list"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">CPU INFO</span></div>
+                    <div class="panel-body" id="spec-cpu-list"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">STORAGE</span></div>
+                    <div class="panel-body" id="spec-disk-list"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><span class="panel-title">NETWORK INTERFACES</span></div>
+                    <div class="panel-body" id="spec-net-list"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>
