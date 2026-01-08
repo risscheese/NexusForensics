@@ -50,11 +50,12 @@ To ensure the security and integrity of the forensic tools, this repository does
 **For Windows (WinPMEM):**
 1.  Download the latest release from the [Official WinPMEM Repository](https://github.com/Velocidex/WinPmem/releases).
 2.  Look for the file named `winpmem_mini_x64_rc2.exe` (or similar).
-3.  **Action:** Rename the downloaded file to `winpmem_mini_x64_rc2.exe` and place it in the root `NexusForensics/` folder.
+3.  **Action:** Rename the downloaded file to `winpmem.exe` and place it in the root `NexusForensics/` folder.
 
 **For Linux (AVML):**
 1.  Download the latest release from the [Official AVML Repository](https://github.com/microsoft/avml/releases).
-2.  **Action:** Place the `avml` binary in the root `NexusForensics/` folder and ensure it is executable (`chmod +x avml`).
+2.  **Action:** Place the renamed file `avml` binary in the root `NexusForensics/` folder and ensure it is executable (`chmod +x avml`).
+3.  
    
 ---
 
@@ -149,5 +150,6 @@ https://flask.palletsprojects.com/en/stable/
 ---
 ## ⚖️ License & Disclaimer
 Disclaimer: This tool is intended for legal forensic analysis and educational purposes only. The developers of Nexus Forensics assume no liability and are not responsible for any misuse or damage caused by this program. Always ensure you have authorization before analyzing a system.
+
 
 
