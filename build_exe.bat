@@ -27,7 +27,7 @@ py -m PyInstaller --noconfirm --onefile --windowed --clean ^
     --name "NexusForensics" ^
     --add-data "templates;templates" ^
     --add-data "static;static" ^
-    --add-binary "winpmem_mini_x64_rc2.exe;." ^
+    --add-binary "winpmem.exe;." ^
     --hidden-import "capture_engine" ^
     --hidden-import "routes" ^
     --hidden-import "webview" ^
@@ -42,3 +42,4 @@ if exist "dist\NexusForensics.exe" (
     echo [ERROR] Build failed. Check the error messages above.
 )
 pause
+
