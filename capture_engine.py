@@ -43,7 +43,7 @@ class CaptureEngine:
         
         tool_path = None
         if current_os == 'Windows':
-            tool_path = os.path.join(base_dir, 'winpmem_mini_x64_rc2.exe')
+            tool_path = os.path.join(base_dir, 'winpmem.exe')
         elif current_os == 'Linux':
             tool_path = os.path.join(base_dir, 'avml')
         
@@ -172,3 +172,4 @@ class CaptureEngine:
 
 # Global Engine Instance
 engine = CaptureEngine()
+
