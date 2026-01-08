@@ -123,4 +123,18 @@ If you want to compile the `.exe` yourself:
 
 ---
 
+## 🎖 Credits & Acknowledgments
+Nexus Forensics makes use of several open-source tools to function:
 
+WinPMEM: The core driver used for physical memory acquisition on Windows. 
+https://github.com/Velocidex/WinPmem
+
+AVML: Used for memory acquisition on Linux systems.
+https://github.com/microsoft/avml
+
+Flask: Used for the web interface backend.
+https://flask.palletsprojects.com/en/stable/
+
+---
+##⚖️ License & Disclaimer
+Disclaimer: This tool is intended for legal forensic analysis and educational purposes only. The developers of Nexus Forensics assume no liability and are not responsible for any misuse or damage caused by this program. Always ensure you have authorization before analyzing a system.
