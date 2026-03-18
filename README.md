@@ -55,7 +55,7 @@ To ensure the security and integrity of the forensic tools, this repository does
 **For Linux (AVML):**
 1.  Download the latest release from the [Official AVML Repository](https://github.com/microsoft/avml/releases).
 2.  **Action:** Place the renamed file `avml` binary in the root `NexusForensics/` folder and ensure it is executable (`chmod +x avml`).
-3.  
+
    
 ---
 
